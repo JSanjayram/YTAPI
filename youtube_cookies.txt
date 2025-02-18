@@ -1,1 +1,7 @@
+# Netscape HTTP Cookie File
+# This is an example cookies file for youtube.com
 
+.youtube.com    TRUE    /    FALSE    1629177810    CONSENT    YES+cb
+.youtube.com    TRUE    /    FALSE    1629177810    PREF    f1=50000000
+.youtube.com    TRUE    /    FALSE    1629177810    YSC    Vj1rx8JTrI8
+.youtube.com    TRUE    /    FALSE    1629177810    VISITOR_INFO1_LIVE    EnI_k3e8klw
