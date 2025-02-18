@@ -21,6 +21,7 @@ async def get_audio_uri(video_id: str):
                 'preferredquality': '192',
             }],
             'noplaylist': True,
+    'cookiefile': 'youtube_cookies.txt'  # Path to your cookies file
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
