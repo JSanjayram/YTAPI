@@ -1,32 +1,42 @@
+import os
 from fastapi import FastAPI, HTTPException
 import yt_dlp
+
+# Access environment variables
+YT_API_KEY = os.getenv("YT_API_KEY")
 
 app = FastAPI()
 
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        # Construct the YouTube video URL
+        # Example of using the environment variable
+        if not YT_API_KEY:
+            raise HTTPException(status_code=500, detail="API key is missing.")
+
         url = f'https://www.youtube.com/watch?v={video_id}'
-        
+
         # Set up yt-dlp options
         ydl_opts = {
-            'format': 'bestaudio/best',  # Choose the best audio format
-            'quiet': True,  # No console output
-            'extractaudio': True,  # Extract audio only
-            'audioquality': 1,  # Best quality
-            'outtmpl': 'downloads/%(id)s.%(ext)s',  # Save file template
+            'format': 'bestaudio/best',
+            'quiet': True,
+            'extractaudio': True,
+            'audioquality': 1,
+            'outtmpl': 'downloads/%(id)s.%(ext)s',
             'postprocessors': [{
                 'key': 'FFmpegAudioConvertor',
-                'preferredcodec': 'mp3',  # Or 'aac', 'opus', etc.
+                'preferredcodec': 'mp3',
             }],
-            'noplaylist': True,  # Don't extract from playlists
+            'noplaylist': True,
+            'headers': {
+                'Authorization': f'Bearer {YT_API_KEY}'  # Example of using the API key
+            },
         }
 
         # Extract audio URL using yt-dlp
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)  # Only fetch info, not the file
-            audio_url = info_dict['formats'][0]['url']  # Get the best audio URL
+            info_dict = ydl.extract_info(url, download=False)
+            audio_url = info_dict['formats'][0]['url']
 
         return {"audio_uri": audio_url}
 
