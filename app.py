@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-import yt_dlp
+import requests
 
 app = FastAPI()
 
@@ -10,27 +10,17 @@ async def read_root():
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        url = f'https://www.youtube.com/watch?v={video_id}'
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'quiet': False,
-            'outtmpl': 'downloads/%(id)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'noplaylist': True,
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            }
-        }
+        invidious_url = f'https://yewtu.be/api/v1/videos/{video_id}'
+        response = requests.get(invidious_url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch video info")
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
-            formats = info_dict.get('formats', [])
-            audio_url = [f['url'] for f in formats if f.get('acodec') != 'none'][0]
+        video_info = response.json()
+        audio_formats = [format for format in video_info['adaptiveFormats'] if format['type'].startswith('audio')]
+        if not audio_formats:
+            raise HTTPException(status_code=404, detail="No audio formats found")
 
+        audio_url = audio_formats[0]['url']
         return {"audio_uri": audio_url}
 
     except Exception as e:
