@@ -1,5 +1,18 @@
 from fastapi import FastAPI, HTTPException
 import yt_dlp
+import random
+
+# Example free proxy list (replace with actual proxies)
+PROXY_LIST = [
+    "http://219.65.73.81:80",
+    "http://202.131.153.146:1111",
+    "http://103.137.218.65:83",
+    "http://210.16.92.0:58080",
+    "http://160.25.180.35:8080	",
+]
+
+
+proxy = random.choice(PROXY_LIST)
 
 app = FastAPI()
 
@@ -22,6 +35,8 @@ async def get_audio_uri(video_id: str):
             }],
             'noplaylist': True,
             'geo_bypass': True,  # Attempt to bypass geographic restrictions
+            'proxy': proxy,  # Using the selected proxy
+
 
         }
 
