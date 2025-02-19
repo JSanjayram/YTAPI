@@ -12,4 +12,3 @@ uvicorn==0.22.0
 yt-dlp
 gunicorn==20.1.0
 requests
-random
