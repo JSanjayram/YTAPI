@@ -21,6 +21,8 @@ async def get_audio_uri(video_id: str):
                 'preferredquality': '192',
             }],
             'noplaylist': True,
+            'geo_bypass': True,  # Attempt to bypass geographic restrictions
+
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
