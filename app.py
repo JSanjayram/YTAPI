@@ -43,7 +43,7 @@ async def get_audio_uri(video_id: str):
             }],
             'noplaylist': True,
             'geo_bypass': True,  # Attempt to bypass geographic restrictions
-            'socket_timeout': 120  # Increase timeout to 120 seconds
+            'socket_timeout': 120,  # Increase timeout to 120 seconds
             'ffmpeg_location': '/usr/bin/ffmpeg',  # Specify the location of FFmpeg
             'ffprobe_location': '/usr/bin/ffprobe' 
         }
