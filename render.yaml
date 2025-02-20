@@ -2,7 +2,7 @@ services:
   - type: web
     name: youtube-audio-api
     env: python
-    region: <your-region>
+    region: india
     plan: free
     buildCommand: |
       apt-get update -y
