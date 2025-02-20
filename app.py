@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import yt_dlp
 import random
-
+import os
 # Example free proxy list (replace with actual proxies)
 PROXY_LIS = [
     "http://219.65.73.81:80",
