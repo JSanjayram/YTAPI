@@ -6,17 +6,12 @@ app = Flask(__name__)
 @app.get("/get-audio-uri/<video_id>")
 def get_audio_uri(video_id):
     ydl_opts = {
-        'format': 'bestaudio',
-        'quiet': True,
-        'extractaudio': True,
-        'audioformat': 'mp3',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': '%(id)s.%(ext)s',
-    }
+    'format': 'bestaudio',
+    'quiet': True,
+    'extractaudio': True,
+    'audioformat': 'mp3',
+    'outtmpl': '%(id)s.%(ext)s',
+}
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
