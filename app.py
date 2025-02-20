@@ -36,6 +36,7 @@ async def get_audio_uri(video_id: str):
             'noplaylist': True,
             'geo_bypass': True,  # Attempt to bypass geographic restrictions
             'proxy': proxy,  # Using the selected proxy
+            'socket_timeout': 60  # Increase timeout to 60 seconds
 
         }
 
