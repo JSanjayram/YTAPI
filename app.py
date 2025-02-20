@@ -3,11 +3,8 @@ import yt_dlp
 
 app = Flask(__name__)
 
-@app.route('/extract-audio', methods=['POST'])
-def extract_audio():
-    video_id = request.json.get('video_id')
-    if not video_id:
-        return jsonify({'error': 'No video ID provided'}), 400
+@app.get("/get-audio-uri/<video_id>")
+def get_audio_uri(video_id):
 
     ydl_opts = {
         'format': 'bestaudio',
