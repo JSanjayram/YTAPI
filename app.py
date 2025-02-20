@@ -21,7 +21,8 @@ PROXY_LIST = [
 proxy = random.choice(PROXY_LIST)
 API_KEY = "AIzaSyAoQwPeQ0beBRsgSdq4e4TAxFpTdrY97Yo"
 app = FastAPI()
-
+if not os.path.exists('downloads'):
+    os.makedirs('downloads')
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the YouTube Audio API!"}
