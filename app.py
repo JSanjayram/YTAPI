@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Replace with a random secret key
 
 # Path to your client secrets file
-CLIENT_SECRETS_FILE = '/client_secret_1024789584636-cditrja9n2umjsan406ti0po7gak07hk.apps.googleusercontent.com.json'  # Update this path if necessary
+CLIENT_SECRETS_FILE = '/cs.json'  # Update this path if necessary
 
 # OAuth 2.0 scopes
 SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
