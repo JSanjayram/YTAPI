@@ -1,55 +1,34 @@
-from fastapi import FastAPI, HTTPException
+from flask import Flask, request, jsonify
 import yt_dlp
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/")
-async def read_root():
-    return {"message": "Welcome to the YouTube Audio API!"}
+@app.route('/extract-audio', methods=['POST'])
+def extract_audio():
+    video_id = request.json.get('video_id')
+    if not video_id:
+        return jsonify({'error': 'No video ID provided'}), 400
 
-@app.get("/get-audio-uri/{video_id}")
-async def get_audio_uri(video_id: str):
-    try:
-        url = f'https://www.youtube.com/watch?v={video_id}'
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'quiet': False,
-            'outtmpl': 'downloads/%(id)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'noplaylist': True,
-        }
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
-            formats = info_dict.get('formats', [])
-            audio_url = [f['url'] for f in formats if f.get('acodec') != 'none'][0]
-
-        return {"audio_uri": audio_url}
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error extracting audio URL: {str(e)}")
-
-
-"""ydl_opts = {
-    'format': 'bestaudio/best',
-    'quiet': False,
-    'outtmpl': 'downloads/%(id)s.%(ext)s',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }],
-    'noplaylist': True,
-    'geo_bypass': True,
-    'proxy': proxy,  # Using the selected proxy
-    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',  # Set custom user-agent
-    'headers': {
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
+    ydl_opts = {
+        'format': 'bestaudio',
+        'quiet': True,
+        'extractaudio': True,
+        'audioformat': 'mp3',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': '%(id)s.%(ext)s',
     }
-}
-"""
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
+            info = ydl.extract_info(f'https://www.youtube.com/watch?v={video_id}', download=False)
+            audio_url = info['url']
+            return jsonify({'audio_url': audio_url})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
