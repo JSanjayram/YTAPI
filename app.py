@@ -1,16 +1,54 @@
-from flask import Flask, jsonify
-import yt_dlp
+from flask import Flask, redirect, request, session, url_for, jsonify
+from google_auth_oauthlib.flow import Flow
+import os
 import requests
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Replace with a random secret key
 
-API_KEY = "AIzaSyAoQwPeQ0beBRsgSdq4e4TAxFpTdrY97Yo"  # Replace with your actual API key
+# Path to your client secrets file
+CLIENT_SECRETS_FILE = '/client_secrets.json'  # Update this path if necessary
 
-@app.get("/get-audio-uri/<video_id>")
+# OAuth 2.0 scopes
+SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
+
+@app.route('/')
+def index():
+    return 'Welcome! <a href="/authorize">Login with Google</a>'
+
+@app.route('/authorize')
+def authorize():
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE,
+        scopes=SCOPES,
+        redirect_uri=url_for('oauth2callback', _external=True)
+    )
+    authorization_url, state = flow.authorization_url(access_type='offline')
+    session['state'] = state
+    return redirect(authorization_url)
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE,
+        scopes=SCOPES,
+        state=session['state'],
+        redirect_uri=url_for('oauth2callback', _external=True)
+    )
+    flow.fetch_token(authorization_response=request.url)
+    credentials = flow.credentials
+    session['credentials'] = credentials_to_dict(credentials)
+    return redirect(url_for('get_audio_uri', video_id='gEC8IEZYxc0'))  # Replace with your video ID
+
+@app.route('/get-audio-uri/<video_id>')
 def get_audio_uri(video_id):
-    # Check if the video is public using YouTube Data API
-    url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&key={API_KEY}&part=status'
-    response = requests.get(url)
+    if 'credentials' not in session:
+        return redirect('authorize')
+
+    credentials = session['credentials']
+    headers = {'Authorization': f'Bearer {credentials["token"]}'}
+    url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=status'
+    response = requests.get(url, headers=headers)
     data = response.json()
 
     if 'items' in data and len(data['items']) > 0:
@@ -36,6 +74,16 @@ def get_audio_uri(video_id):
             return jsonify({'error': 'Video is not public.'}), 403
     else:
         return jsonify({'error': 'Video not found.'}), 404
+
+def credentials_to_dict(credentials):
+    return {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
