@@ -3,14 +3,20 @@ import yt_dlp
 import random
 
 # Example free proxy list (replace with actual proxies)
-PROXY_LIST = [
+PROXY_LIS = [
     "http://219.65.73.81:80",
     "http://202.131.153.146:1111",
-    """http://103.137.218.65:83",
+    "http://103.137.218.65:83",
     "http://210.16.92.0:58080",
-    "http://160.25.180.35:8080	","""
+    "http://160.25.180.35:8080",
 ]
-
+PROXY_LIST = [
+    "http://103.139.98.67",
+    "http://202.145.10.251",
+    "http://8.215.12.103",
+    "http://124.158.153.218",
+    "http://27.112.66.18",
+]
 
 proxy = random.choice(PROXY_LIST)
 
