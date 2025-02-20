@@ -19,7 +19,7 @@ PROXY_LIST = [
 ]
 
 proxy = random.choice(PROXY_LIST)
-
+API_KEY = "AIzaSyAoQwPeQ0beBRsgSdq4e4TAxFpTdrY97Yo"
 app = FastAPI()
 
 @app.get("/")
@@ -29,7 +29,7 @@ async def read_root():
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        url = f'https://www.youtube.com/watch?v={video_id}'
+        url =f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet,contentDetails,statistics&key={API_KEY}'
         ydl_opts = {
             'format': 'bestaudio/best',
             'quiet': False,
