@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-API_KEY = 'YOUR_API_KEY'  # Replace with your actual API key
+API_KEY = "AIzaSyAoQwPeQ0beBRsgSdq4e4TAxFpTdrY97Yo"  # Replace with your actual API key
 
 @app.get("/get-audio-uri/<video_id>")
 def get_audio_uri(video_id):
