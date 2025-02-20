@@ -30,7 +30,7 @@ async def read_root():
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        url = f'https://www.youtube.com/watch?v={video_id}'
+        url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet,contentDetails,statistics&key={API_KEY}'
         output_template = f'downloads/{video_id}.%(ext)s'
         ydl_opts = {
             'format': 'bestaudio/best',
