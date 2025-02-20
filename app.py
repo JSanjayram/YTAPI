@@ -29,11 +29,12 @@ async def read_root():
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        url =f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet,contentDetails,statistics&key={API_KEY}'
+        url = f'https://www.youtube.com/watch?v={video_id}'
+        output_template = f'downloads/{video_id}.%(ext)s'
         ydl_opts = {
             'format': 'bestaudio/best',
             'quiet': False,
-            'outtmpl': 'downloads/%(id)s.%(ext)s',
+            'outtmpl': output_template,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -41,16 +42,17 @@ async def get_audio_uri(video_id: str):
             }],
             'noplaylist': True,
             'geo_bypass': True,  # Attempt to bypass geographic restrictions
-           # 'proxy': proxy,  # Using the selected proxy
-            'socket_timeout': 60  # Increase timeout to 60 seconds
-
+            'socket_timeout': 120  # Increase timeout to 120 seconds
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
-            formats = info_dict.get('formats', [])
-            audio_url = [f['url'] for f in formats if f.get('acodec') != 'none'][0]
+            ydl.download([url])
+        
+        audio_file = f'downloads/{video_id}.mp3'
+        if not os.path.exists(audio_file):
+            raise HTTPException(status_code=400, detail="Failed to download audio file")
 
+        audio_url = f"/downloads/{video_id}.mp3"
         return {"audio_uri": audio_url}
 
     except Exception as e:
