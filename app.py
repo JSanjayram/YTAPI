@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 @app.get("/get-audio-uri/<video_id>")
 def get_audio_uri(video_id):
-
     ydl_opts = {
         'format': 'bestaudio',
         'quiet': True,
