@@ -21,8 +21,11 @@ PROXY_LIST = [
 proxy = random.choice(PROXY_LIST)
 API_KEY = "AIzaSyAoQwPeQ0beBRsgSdq4e4TAxFpTdrY97Yo"
 app = FastAPI()
-if not os.path.exists('downloads'):
-    os.makedirs('downloads')
+from fastapi import FastAPI, HTTPException
+import yt_dlp
+
+app = FastAPI()
+
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the YouTube Audio API!"}
@@ -30,33 +33,53 @@ async def read_root():
 @app.get("/get-audio-uri/{video_id}")
 async def get_audio_uri(video_id: str):
     try:
-        url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&part=snippet,contentDetails,statistics&key={API_KEY}'
-        output_template = f'downloads/{video_id}.%(ext)s'
+        url = f'https://www.youtube.com/watch?v={video_id}'
         ydl_opts = {
-            'format': 'bestaudio/best',
-            'quiet': False,
-            'outtmpl': output_template,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'noplaylist': True,
-            'geo_bypass': True,  # Attempt to bypass geographic restrictions
-            'socket_timeout': 120,  # Increase timeout to 120 seconds
-            'ffmpeg_location': '/usr/bin/ffmpeg',  # Specify the location of FFmpeg
-            'ffprobe_location': '/usr/bin/ffprobe' 
-        }
+    'format': 'bestaudio/best',
+    'quiet': False,
+    'outtmpl': 'downloads/%(id)s.%(ext)s',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'noplaylist': True,
+    'geo_bypass': True,
+    'proxy': proxy,  # Using the selected proxy
+    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',  # Set custom user-agent
+    'headers': {
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+    }
+}
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        
-        audio_file = f'downloads/{video_id}.mp3'
-        if not os.path.exists(audio_file):
-            raise HTTPException(status_code=400, detail="Failed to download audio file")
+            info_dict = ydl.extract_info(url, download=False)
+            formats = info_dict.get('formats', [])
+            audio_url = [f['url'] for f in formats if f.get('acodec') != 'none'][0]
 
-        audio_url = f"/downloads/{video_id}.mp3"
         return {"audio_uri": audio_url}
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error extracting audio URL: {str(e)}")
+
+
+"""ydl_opts = {
+    'format': 'bestaudio/best',
+    'quiet': False,
+    'outtmpl': 'downloads/%(id)s.%(ext)s',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'noplaylist': True,
+    'geo_bypass': True,
+    'proxy': proxy,  # Using the selected proxy
+    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',  # Set custom user-agent
+    'headers': {
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+    }
+}
+"""
