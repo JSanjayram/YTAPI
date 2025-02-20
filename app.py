@@ -21,7 +21,7 @@ def authorize():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE,
         scopes=SCOPES,
-        redirect_uri=url_for('oauth2callback', _external=True)
+        redirect_uri='https://ytapi-1-0cq0.onrender.com/oauth2callback'  # Use the Render URI
     )
     authorization_url, state = flow.authorization_url(access_type='offline')
     session['state'] = state
