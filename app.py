@@ -62,6 +62,8 @@ def get_audio_uri(video_id):
                 'extractaudio': True,
                 'audioformat': 'mp3',
                 'outtmpl': '%(id)s.%(ext)s',
+                'cookiefile': 'cookies.txt',  # Path to your cookies file
+
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
