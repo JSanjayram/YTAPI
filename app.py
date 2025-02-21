@@ -39,7 +39,7 @@ def oauth2callback():
     flow.fetch_token(authorization_response=request.url)
     credentials = flow.credentials
     session['credentials'] = credentials_to_dict(credentials)
-    return redirect(url_for('get_audio_uri', video_id='gEC8IEZYxc0'))  # Replace with your video ID
+    return redirect("myapp://callback?login=success")
 
 @app.route('/get-audio-uri/<video_id>')
 def get_audio_uri(video_id):
