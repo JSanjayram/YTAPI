@@ -41,7 +41,31 @@ def oauth2callback():
     session['credentials'] = credentials_to_dict(credentials)
     return redirect(url_for('get_audio_uri', video_id='gEC8IEZYxc0'))  # Replace with your video ID
 
-@app.route('/get-audio-uri/<video_id>')
+#@app.route('/get-audio-uri/<video_id>')
+@app.get("/get-audio-uri/{video_id}")
+async def get_audio_uri(video_id: str):
+    try:
+        url = f'https://www.youtube.com/watch?v={video_id}'
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'quiet': False,
+            'outtmpl': 'downloads/%(id)s.%(ext)s',
+            'audioformat': 'mp3',
+            'cookiefile': 'cookies.txt',  # Path to your cookies file
+            'noplaylist': True,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+            formats = info_dict.get('formats', [])
+            audio_url = [f['url'] for f in formats if f.get('acodec') != 'none'][0]
+
+        return {"audio_uri": audio_url}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error extracting audio URL: {str(e)}")
+
+"""
 def get_audio_uri(video_id):
     if 'credentials' not in session:
         return redirect('authorize')
@@ -89,4 +113,4 @@ def credentials_to_dict(credentials):
     }
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)"""
